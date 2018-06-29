@@ -93,8 +93,6 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
         --name coscale_zookeeper $REGISTRY/coscale/zookeeper:$VERSION
 fi
 
-
-
 if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE" == "kafka" ]]; then
     # Setup Kafka
     echo "Setting up kafka node $INDEX : ${NODES[$((INDEX-1))]}"
@@ -116,7 +114,6 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
         --restart unless-stopped \
         --name coscale_kafka $REGISTRY/coscale/kafka:$VERSION
 fi
-
 
 if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE" == "streamingroller" ]]; then
     # Setup Streamingroller
@@ -170,4 +167,3 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
         -e "API_SUPER_PASSWD=$API_SUPER_PASSWD" \
         --name coscale_anomalyaggregator $REGISTRY/coscale/anomalyaggregator:$VERSION
 fi
-
