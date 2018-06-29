@@ -78,20 +78,22 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
 
     docker run -d \
         -e ZOOKEEPER_SERVER_ID=$INDEX \
-        -e ZOOKEEPER_CLIENT_PORT=2181 \
         -e ZOOKEEPER_SERVERS="$(join_strings ":2888:3888" ";" ${INTERNAL_NODES[@]})" \
         -e ZOOKEEPER_TICK_TIME=2000 \
         -e ZOOKEEPER_INIT_LIMIT=5 \
         -e ZOOKEEPER_SYNC_LIMIT=2 \
-        -e KAFKA_JMX_PORT=9997 \
         -e KAFKA_JMX_HOSTNAME=localhost \
         -v `pwd`/../data/zookeeper/data:/var/lib/zookeeper/data:Z \
         -v `pwd`/../data/zookeeper/log:/var/lib/zookeeper/log:Z \
         -v `pwd`/../data/zookeeper/secrets:/etc/zookeeper/secrets:Z \
+        --log-opt max-size=100m \
+        --log-opt max-file=10 \
         --net=host \
         --restart unless-stopped \
         --name coscale_zookeeper $REGISTRY/coscale/zookeeper:$VERSION
 fi
+
+
 
 if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE" == "kafka" ]]; then
     # Setup Kafka
@@ -99,20 +101,22 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
 
     docker run -d \
         -e KAFKA_BROKER_ID=$INDEX \
-        -e KAFKA_ZOOKEEPER_CONNECT="$(join_strings ":2181" "," ${INTERNAL_NODES[@]})" \
+        -e KAFKA_ZOOKEEPER_CONNECT="$(join_strings ":32181" "," ${INTERNAL_NODES[@]})" \
         -e KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://${NODES[$((INDEX-1))]}:9092" \
         -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${REPLICATION_FACTOR} \
-        -e KAFKA_JMX_PORT=9998 \
         -e KAFKA_JMX_HOSTNAME=localhost \
         -e KAFKA_AUTO_CREATE_TOPICS_ENABLE=false \
         -e KAFKA_LOG4J_ROOT_LOGLEVEL=INFO \
         -e GROUP_INITIAL_REBALANCE_DELAY_MS=60000 \
         -v `pwd`/../data/kafka/data:/var/lib/kafka/data:Z \
         -v `pwd`/../data/kafka/secrets:/etc/kafka/secrets:Z \
+        --log-opt max-size=100m \
+        --log-opt max-file=10 \
         --net=host \
         --restart unless-stopped \
         --name coscale_kafka $REGISTRY/coscale/kafka:$VERSION
 fi
+
 
 if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE" == "streamingroller" ]]; then
     # Setup Streamingroller
@@ -166,3 +170,4 @@ if [[ "$SERVICE" == "all" ]] || [[ "$SERVICE" == "streaming" ]] || [[ "$SERVICE"
         -e "API_SUPER_PASSWD=$API_SUPER_PASSWD" \
         --name coscale_anomalyaggregator $REGISTRY/coscale/anomalyaggregator:$VERSION
 fi
+
